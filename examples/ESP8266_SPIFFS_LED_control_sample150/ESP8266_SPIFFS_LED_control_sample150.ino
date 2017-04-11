@@ -154,11 +154,11 @@ Serial.println(data_i);
 }
 //************************* Websocket handshake **************************************
 void websocket_handshake(){
-  String html_str1="", html_str2="", html_str3="", html_str4="", html_str5="", html_str6="", html_str7="";
-
   get_http_req_status = ews.Get_Http_Req_Status(); //ブラウザからGETリクエストがあったかどうかの判定
   
   if(get_http_req_status == true){
+    String html_str1="", html_str2="", html_str3="", html_str4="", html_str5="", html_str6="", html_str7="";
+
     //※String変数一つにEWS_Canvas_Slider_T関数は２つまでしか入らない
     html_str1 = "<body style='background:#000; color:#fff;'>\r\n";
     html_str1 += "<font size=3>\r\n";
