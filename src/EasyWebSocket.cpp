@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.cpp - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.49
+  Beta version 1.50
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
@@ -40,7 +40,6 @@ Copyright (c) 2015 Ivan Grokhotkov. All rights reserved.
 Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 */
 
-#include "Arduino.h"
 #include "EasyWebSocket.h"
 
 const char* GUID_str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -162,50 +161,31 @@ void EasyWebSocket::handleClient(){
     }
   }
 }
-//********WebSocket Hand Shake ****************
-void EasyWebSocket::EWS_HandShake(String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7){
+//*********handleClient***************
+bool EasyWebSocket::Get_Http_Req_Status(){
   String req;
   String hash_req_key;
-  uint32_t LoopTime = millis();
+  _GetLoopTime = millis();
   
   if(!_WS_on){
     handleClient();
   }
-  
+
   if(__client){
-    LoopTime = millis();
+    _GetLoopTime = millis();
     while(!_WS_on){
-      if(millis()-LoopTime > 5000L){
-        _WS_on = false;
-        _Ini_html_on = false;
-        _Upgrade_first_on = false;
-        Serial.println(F("-------Received TimeOut 1"));
-        if(__client){
-          delay(10);
-          __client.stop();
-          Serial.println(F("-------TimeOut Client Stop 1"));
-        }
-        Serial.println(F("-------The Handshake returns to the beginning 1"));
+      if(millis()-_GetLoopTime > 5000L){
+        EasyWebSocket::HandShake_timeout(1);
         break;
       }
 
       delay(1);
       switch(_Ini_html_on){
         case false:
-          LoopTime = millis();
+          _GetLoopTime = millis();
           while(__client){
-            if(millis()-LoopTime > 5000L){
-              _WS_on = false;
-              _Ini_html_on = false;
-              _Upgrade_first_on = false;
-              Serial.println(F("-------Received TimeOut 2"));
-              if(__client){
-                delay(10);
-                __client.stop();
-                Serial.println(F("-------TimeOut Client Stop 2"));
-              }
-              Serial.println(F("-------The Handshake returns to the beginning 2"));
-
+            if(millis()-_GetLoopTime > 5000L){
+              EasyWebSocket::HandShake_timeout(2);
               break;
             }
             if(__client.available()){
@@ -213,92 +193,7 @@ void EasyWebSocket::EWS_HandShake(String res_html1, String res_html2, String res
               if(req.indexOf("GET / HTTP") != -1){
                 Serial.println(F("-------HTTP Request from Browser"));
                 Serial.println(req);
-
-                while(req.indexOf("\r") != 0){
-                  req = __client.readStringUntil('\n');
-                  if(req.indexOf("Upgrade: websocket") != -1){
-                    Serial.println(F("-------Connection: Upgrade HTTP Request"));
-                    Serial.println(req);
-                    _Ini_html_on = true;
-                    _Upgrade_first_on = true;
-                    EasyWebSocket::EWS_HTTP_Responce();
-                    _PingLastTime = millis();
-                    _PongLastTime = millis();
-                    break;
-                  }
-
-                  if(req.indexOf("Android") != -1){
-                    _Android_or_iPad = 'A';
-                  }else if(req.indexOf("iPad") != -1){
-                    _Android_or_iPad = 'i';
-                  }else if(req.indexOf("iPhone") != -1){
-                    _Android_or_iPad = 'P';
-                  }
-                  Serial.println(req);
-				  				yield();
-                }
-                req = "";
-                
-                if(_Upgrade_first_on == true)break;
-                
-                Serial.println(F("-------HTTP Response Send to Browser"));
-                delay(10);
-
-                __client.print(F("HTTP/1.1 200 OK\r\n"));
-                __client.print(F("Content-Type:text/html\r\n"));
-                __client.print(F("Connection:close\r\n\r\n"));
-
-                SPIFFS.begin();
-
-                File f1 = SPIFFS.open("/spiffs_01.txt", "r");
-                if (f1 == 0) {
-                  Serial.print(F("spiffs_01.txt File not found\n"));
-                  __client.print(F("ERROR!!<br>"));
-                  __client.print(F("spiffs_01.txt has not been in SPIFFS"));
-                  return;
-                }else{
-                  Serial.print(F("spiffs_01.txt File found. OK!\n"));
-                }
-                
-                //size_t totalSize_f1 = f1.size();
-                
-                __client.write(f1, 1024);
-                
-                __client.print(res_html1);
-                __client.print(res_html2);
-                __client.print(res_html3);
-                __client.print(res_html4);
-                __client.print(res_html5);
-                __client.print(res_html6);
-                __client.print(res_html7);
-                
-                Serial.println(F("-------HTTP response complete"));
-                
-                f1.close();
-
-                res_html1 = "";
-                res_html2 = "";
-                res_html3 = "";
-                res_html4 = "";
-                res_html5 = "";
-                res_html6 = "";
-                res_html7 = "";
-
-                __client.flush();
-                delay(10);
-
-                __client.stop();
-
-                delay(10);
-
-                Serial.println(F("\n-------GET HTTP client stop"));
-                req = "";
-                _Ini_html_on = true;
-                LoopTime = millis();
-
-                if(_Android_or_iPad == 'i'){
-                  break;
-                }
+                return true;
               }else if(req.indexOf("GET /favicon") != -1){
                 EasyWebSocket::Favicon_Response(req, 0, 1, 2);
                 break;
@@ -310,13 +205,13 @@ void EasyWebSocket::EWS_HandShake(String res_html1, String res_html2, String res
         case true:
           switch(_WS_on){
             case false:
-              EasyWebSocket::EWS_HTTP_Responce();
+              _WS_on = EasyWebSocket::EWS_HTTP_Responce();
               _PingLastTime = millis();
               _PongLastTime = millis();
               break;
             case true:
               Serial.println(F("-------WebSocket HandShake Complete!"));
-              LoopTime = millis();
+              _GetLoopTime = millis();
               break;
           }
           break;
@@ -324,181 +219,191 @@ void EasyWebSocket::EWS_HandShake(String res_html1, String res_html2, String res
 	  	yield();
     }
   }
+  return false;
+}
+
+//****************************************
+bool EasyWebSocket::http_resp(){
+  String req = "";
+  while(req.indexOf("\r") != 0){
+    req = __client.readStringUntil('\n');
+    if(req.indexOf("Upgrade: websocket") != -1){
+      Serial.println(F("-------Connection: Upgrade HTTP Request"));
+      Serial.println(req);
+      _Ini_html_on = true;
+      _Upgrade_first_on = true;
+      _WS_on = EasyWebSocket::EWS_HTTP_Responce();
+      _PingLastTime = millis();
+      _PongLastTime = millis();
+      break;
+    }
+
+    if(req.indexOf("Android") != -1){
+      _Android_or_iPad = 'A';
+    }else if(req.indexOf("iPad") != -1){
+      _Android_or_iPad = 'i';
+    }else if(req.indexOf("iPhone") != -1){
+      _Android_or_iPad = 'P';
+    }
+    Serial.println(req);
+    yield();
+  }
+  req = "";
+
+  if(_Upgrade_first_on == true) return true;
+
+  Serial.println(F("-------HTTP Response Send to Browser"));
+  delay(10);
+
+  __client.print(F("HTTP/1.1 200 OK\r\n"));
+  __client.print(F("Content-Type:text/html\r\n"));
+  __client.print(F("Connection:close\r\n\r\n"));
+  
+  return false;
+}
+//********hand shake time out *****************
+void EasyWebSocket::HandShake_timeout(uint8_t Num){
+  _WS_on = false;
+  _Ini_html_on = false;
+  _Upgrade_first_on = false;
+  Serial.print(F("-------Received TimeOut "));
+  Serial.println(Num);
+  if(__client){
+    delay(10);
+    __client.stop();
+    Serial.print(F("-------TimeOut Client Stop "));
+    Serial.println(Num);
+  }
+  Serial.print(F("-------The Handshake returns to the beginning "));
+  Serial.println(Num);
+}
+//********Hand Shake Main *********************
+File EasyWebSocket::SPIFFS_open(const char *filename){
+  File f = SPIFFS.open(filename, "r");
+  if (f == 0) {
+    Serial.printf("%s File not found\n", filename);
+    __client.print(F("ERROR!!<br>"));
+    __client.print(filename);
+    __client.print(F(" file has not been uploaded to the flash in SPIFFS<br>"));
+  }else{
+    Serial.printf("%s File found. OK!\n", filename);
+  }
+  return f;
+}
+//********WebSocket Hand Shake ****************
+void EasyWebSocket::EWS_HandShake_main(uint8_t sel, const char* head_file1, const char* head_file2, const char* html_file1, const char* html_file2, IPAddress res_LIP, String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7){
+  String req;
+  String hash_req_key;
+  _GetLoopTime = millis();
+  
+  while(__client){
+    
+    if( EasyWebSocket::http_resp() ) break;
+
+    SPIFFS.begin();
+      
+    //size_t totalSizeH1 = HTML_head_F1.size();
+    //size_t totalSizeH2 = HTML_head_F2.size();
+    //size_t totalSize1 = HTML_1.size();
+    //size_t totalSize2 = HTML_2.size();
+
+    File HTML_head_F1, HTML_head_F2, HTML_1, HTML_2;
+
+    HTML_head_F1 = EasyWebSocket::SPIFFS_open(head_file1);
+    if(HTML_head_F1 == 0) return;
+
+    if(sel >= 2){
+      HTML_head_F2 = EasyWebSocket::SPIFFS_open(head_file2);
+      if(HTML_head_F2 == 0) return;
+    }
+    if(sel >= 1){
+      HTML_1 = EasyWebSocket::SPIFFS_open(html_file1);
+      if(HTML_1 == 0) return;
+      HTML_2 = EasyWebSocket::SPIFFS_open(html_file2);
+      if(HTML_2 == 0) return;
+    }
+
+    __client.write(HTML_head_F1, 1460);
+
+    if(sel >= 2){
+      __client.print(res_LIP);
+      __client.write(HTML_head_F2, 1460);
+    }
+    if(sel >= 1){
+      __client.write(HTML_1, 1460);
+    }
+
+    __client.print(res_html1);
+    __client.print(res_html2);
+    __client.print(res_html3);
+    if(sel == 0 || sel == 3){
+      __client.print(res_html4);
+      __client.print(res_html5);
+      __client.print(res_html6);
+      __client.print(res_html7);
+    }
+    if(sel >= 1){
+      __client.write(HTML_2, 1460);
+      HTML_1.close();
+      HTML_2.close();
+    }
+    if(sel >= 2){
+      HTML_head_F2.close();
+    }
+
+    HTML_head_F1.close();
+
+    res_html1 = "";
+    res_html2 = "";
+    res_html3 = "";
+    res_html4 = "";
+    res_html5 = "";
+    res_html6 = "";
+    res_html7 = "";
+
+    Serial.println(F("---------------------HTTP response complete"));
+
+    __client.flush();
+    delay(10);
+
+    __client.stop();
+
+    delay(10);
+
+    Serial.println(F("\n-------GET HTTP client stop"));
+    req = "";
+    _Ini_html_on = true;
+    _GetLoopTime = millis();
+
+    if(_Android_or_iPad == 'i'){
+      break;
+    }
+    break;
+  }
+}
+
+//********WebSocket Hand Shake ****************
+void EasyWebSocket::EWS_HandShake(String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7)
+{
+  bool req_status = EasyWebSocket::Get_Http_Req_Status();
+  
+  if(req_status == true){
+    EasyWebSocket::EWS_HandShake_main(0, "/spiffs_01.txt", "", "", "", IPAddress(0,0,0,0), res_html1, res_html2, res_html3, res_html4, res_html5, res_html6, res_html7);
+  }
 }
 
 //********WebSocket Hand Shake (for devided HTML header files & Auto Local IP address)****************
-void EasyWebSocket::EWS_Dev_AutoLIP_HandShake_str(const char* HTML_head_file1, IPAddress res_LIP, const char* HTML_head_file2, String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7){
-  String req;
-  String hash_req_key;
-  uint32_t LoopTime = millis();
+void EasyWebSocket::EWS_Dev_AutoLIP_HandShake(const char* HTML_head_file1, IPAddress res_LIP, const char* HTML_head_file2, const char* HTML_file1, String res_html1, String res_html2, String res_html3, const char* HTML_file2)
+{
+  bool req_status = EasyWebSocket::Get_Http_Req_Status();
   
-  if(!_WS_on){
-    handleClient();
-  }
-  
-  if(__client){
-    LoopTime = millis();
-    while(!_WS_on){
-
-      if(millis()-LoopTime > 5000L){
-        _WS_on = false;
-        _Ini_html_on = false;
-        _Upgrade_first_on = false;
-        Serial.println(F("-------Received TimeOut 1"));
-        if(__client){
-          delay(10);
-          __client.stop();
-          Serial.println(F("-------TimeOut Client Stop 1"));
-        }
-        Serial.println(F("-------The Handshake returns to the beginning 1"));
-        break;
-      }
-
-      delay(1);
-      switch(_Ini_html_on){
-        case false:
-          LoopTime = millis();
-          while(__client){
-            if(millis()-LoopTime > 5000L){
-              _WS_on = false;
-              _Ini_html_on = false;
-              _Upgrade_first_on = false;
-              Serial.println(F("-------Received TimeOut 2"));
-              if(__client){
-                delay(10);
-                __client.stop();
-                Serial.println(F("-------TimeOut Client Stop 2"));
-              }
-              Serial.println(F("-------The Handshake returns to the beginning 2"));
-
-              break;
-            }
-            if(__client.available()){
-              req = __client.readStringUntil('\n');
-              if(req.indexOf("GET / HTTP") != -1){
-                Serial.println(F("-------HTTP Request from Browser"));
-                Serial.println(req);
-
-                while(req.indexOf("\r") != 0){
-                  req = __client.readStringUntil('\n');
-                  if(req.indexOf("Upgrade: websocket") != -1){
-                    Serial.println(F("-------Connection: Upgrade HTTP Request"));
-                    Serial.println(req);
-                    _Ini_html_on = true;
-                    _Upgrade_first_on = true;
-                    EasyWebSocket::EWS_HTTP_Responce();
-                    _PingLastTime = millis();
-                    _PongLastTime = millis();
-                    break;
-                  }
-
-                  if(req.indexOf("Android") != -1){
-                    _Android_or_iPad = 'A';
-                  }else if(req.indexOf("iPad") != -1){
-                    _Android_or_iPad = 'i';
-                  }else if(req.indexOf("iPhone") != -1){
-                    _Android_or_iPad = 'P';
-                  }
-                  Serial.println(req);
-									yield();
-                }
-                req = "";
-                
-                if(_Upgrade_first_on == true)break;
-                
-                Serial.println(F("-------HTTP Response Send to Browser"));
-                delay(10);
-
-                __client.print(F("HTTP/1.1 200 OK\r\n"));
-                __client.print(F("Content-Type:text/html\r\n"));
-                __client.print(F("Connection:close\r\n\r\n"));
-
-                SPIFFS.begin();
-                
-                File HTML_head_F1 = SPIFFS.open(HTML_head_file1, "r");
-                if (HTML_head_F1 == 0) {
-                  Serial.printf("%s File not found\n",HTML_head_file1);
-                  __client.print(F("ERROR!!<br>"));
-                  __client.print(F("HTML_head file has not been in SPIFFS"));
-                  return;
-                }else{
-                  Serial.printf("%s File found. OK!\n",HTML_head_file1);
-                }
-								
-								File HTML_head_F2 = SPIFFS.open(HTML_head_file2, "r");
-                if (HTML_head_F2 == 0) {
-                  Serial.printf("%s File not found\n",HTML_head_file2);
-                  __client.print(F("ERROR!!<br>"));
-                  __client.print(F("HTML_head file has not been in SPIFFS"));
-                  return;
-                }else{
-                  Serial.printf("%s File found. OK!\n",HTML_head_file2);
-                }
-                
-                //size_t totalSizeH1 = HTML_head_F1.size();
-                //size_t totalSizeH2 = HTML_head_F2.size();
-                
-                __client.write(HTML_head_F1, 1024);
-								__client.print(res_LIP);
-								__client.write(HTML_head_F2, 1024);
-                
-                __client.print(res_html1);
-                __client.print(res_html2);
-                __client.print(res_html3);
-                __client.print(res_html4);
-                __client.print(res_html5);
-                __client.print(res_html6);
-                __client.print(res_html7);
-                
-                HTML_head_F1.close();
-								HTML_head_F2.close();
-                
-                Serial.println(F("-------HTTP response complete"));
-
-                __client.flush();
-                delay(5);
-
-                __client.stop();
-
-                delay(5);
-
-                Serial.println(F("\n-------GET HTTP client stop"));
-                req = "";
-                _Ini_html_on = true;
-                LoopTime = millis();
-
-                if(_Android_or_iPad == 'i'){
-                  break;
-                }
-              }else if(req.indexOf("GET /favicon") != -1){
-                EasyWebSocket::Favicon_Response(req, 0, 1, 2);
-                break;
-              }
-            }
-						yield();
-          }
-          break;
-        case true:
-          switch(_WS_on){
-            case false:
-              EasyWebSocket::EWS_HTTP_Responce();
-              _PingLastTime = millis();
-              _PongLastTime = millis();
-              break;
-            case true:
-              Serial.println(F("-------WebSocket HandShake Complete!"));
-              LoopTime = millis();
-              break;
-          }
-          break;
-      }
-			yield();
-    }
+  if(req_status == true){
+    EasyWebSocket::EWS_HandShake_main(2, HTML_head_file1, HTML_head_file2, HTML_file1, HTML_file2, res_LIP, res_html1, res_html2, res_html3, "", "", "", "");
   }
 }
 
 //************HTTP Response**************************
-void EasyWebSocket::EWS_HTTP_Responce(){  
+bool EasyWebSocket::EWS_HTTP_Responce(){  
   String req;
   String hash_req_key;
   uint32_t LoopTime = millis();
@@ -509,16 +414,7 @@ void EasyWebSocket::EWS_HTTP_Responce(){
 
   while(__client){
     if(millis()-LoopTime > 5000L){
-      _WS_on = false;
-      _Ini_html_on = false;
-      _Upgrade_first_on = false;
-      Serial.println(F("-------Received TimeOut 3"));
-      if(__client){
-        delay(10);
-        __client.stop();
-        Serial.println(F("-------TimeOut Client Stop 3"));
-      }
-      Serial.println(F("-------The Handshake returns to the beginning 3"));
+      EasyWebSocket::HandShake_timeout(3);
       break;
     }
 
@@ -594,6 +490,7 @@ void EasyWebSocket::EWS_HTTP_Responce(){
     }
 		yield();
   }
+  return _WS_on;
 }
 
 //************Hash sha1 base64 encord**************************

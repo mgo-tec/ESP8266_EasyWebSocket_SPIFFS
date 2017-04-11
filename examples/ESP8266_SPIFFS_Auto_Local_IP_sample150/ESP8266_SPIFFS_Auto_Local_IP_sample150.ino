@@ -1,6 +1,6 @@
 /*
 EasyWebSocket_SPIFFS for ESP-WROOM-02 ( ESP8266 ) Sample Sketch
-for Beta version 1.49
+for Beta version 1.50
 ---> https://www.mgo-tec.com
 Please rewrite their own the ssid and password.
 Requied HTML header files. "/data/HTMhead1.txt" & "/data/HTMhead2.txt" in the sketch folder.
@@ -8,11 +8,13 @@ Use the SPIFFS file system uploader, please upload the HTMhead1.txt & HTMhead2.t
 */
 #include <EasyWebSocket.h>
 
-const char* ssid = "xxxx";
-const char* password = "xxxx";
+const char* ssid = "xxxx"; //ご自分のルーターのSSIDに書き換えてください
+const char* password = "xxxx"; //ご自分のルーターのパスワードに書き換えてください
 
 const char* HTM_head_file1 = "/HTMhead1.txt"; //HTMLヘッダファイル1
 const char* HTM_head_file2 = "/HTMhead2.txt"; //HTMLヘッダファイル2
+const char* HTML_body_file = "/dummy.txt"; //HTML body要素ファイル（ここではダミーファイルとしておく）
+const char* dummy_file = "/dummy.txt"; //HTMLファイル連結のためのダミーファイル
 
 long CountTime;
 
@@ -23,12 +25,13 @@ IPAddress LIP; //ESP-WROOM-02(ESP8266) ローカルIPアドレス自動取得用
 
 String ret_str;
 String txt = "text send??";
+bool get_http_req_status = false; //ブラウザからGETリクエストがあったかどうかの判定変数
 
-int PingSendTime = 30000;
+int PingSendTime = 10000;
 
-#define ledPin1 12 //GPIO #12
-#define ledPin2 13 //GPIO #13
-#define ledPin3 14 //GPIO #14
+#define ledPin1 16 //GPIO #16 ※16番ピンはGPIOダイレクトアクセスは使えないので注意
+#define ledPin2 5 //GPIO #5
+#define ledPin3 4 //GPIO #4
 
 void setup() 
 {
@@ -156,68 +159,49 @@ Serial.println(data_i);
 }
 //************************* Websocket handshake **************************************
 void websocket_handshake(){
-  String html_str1, html_str2, html_str3, html_str4, html_str5, html_str6, html_str7;
+  String html_str1="", html_str2="", html_str3="", html_str4="", html_str5="", html_str6="", html_str7="";
 
-  //The assignment in the Body element of the browser of HTML to a String variable
-  html_str1 += "<body style='background:#000; color:#fff;'>\r\n";
-  html_str1 += "<font size=3>\r\n";
-  html_str1 += "ESP-WROOM-02(ESP8266)\r\n";
-  html_str1 += "<br>\r\n";
-  html_str1 += "EasyWebSocket Beta1.49 Sample\r\n";
-  html_str1 += "</font><br>\r\n";
-  html_str1 += ews.EWS_BrowserSendRate();
-  html_str1 += "<br>\r\n";
-  html_str1 += ews.EWS_BrowserReceiveTextTag2("wroomTXT", "from WROOM DATA", "#555", 20,"green");
-  html_str1 += "<br>\r\n";
-  html_str1 += ews.EWS_Status_Text2("WebSocket Status","#555", 20,"#FF00FF");
-  html_str1 += "<br><br>\r\n";
-  html_str1 += ews.EWS_TextBox_Send("txt1", "Hello Easy WebSocket Beta1.3","送信");
-  html_str1 += "<br><br>\r\n";
+  get_http_req_status = ews.Get_Http_Req_Status(); //ブラウザからGETリクエストがあったかどうかの判定
+  
+  if(get_http_req_status == true){
+    //※String変数一つにEWS_Canvas_Slider_T関数は２つまでしか入らない
+    html_str1 += "<body style='background:#000; color:#fff;'>\r\n";
+    html_str1 += "<font size=3>\r\n";
+    html_str1 += "ESP-WROOM-02(ESP8266)\r\n";
+    html_str1 += "<br>\r\n";
+    html_str1 += "SPIFFS_EasyWebSocket Beta1.50 Sample\r\n";
+    html_str1 += "</font><br>\r\n";
+    html_str1 += ews.EWS_BrowserSendRate();
+    html_str1 += "<br>\r\n";
+    html_str1 += ews.EWS_BrowserReceiveTextTag2("wroomTXT", "from WROOM DATA", "#555", 20,"green");
+    html_str1 += "<br>\r\n";
+    html_str1 += ews.EWS_Status_Text2("WebSocket Status","#555", 20,"#FF00FF");
+    html_str1 += "<br><br>\r\n";
+    html_str1 += ews.EWS_TextBox_Send("txt1", "Hello Easy WebSocket Beta1.3","送信");
+    html_str1 += "<br><br>\r\n";
+    html_str1 += "LED \r\n";
+    html_str1 += ews.EWS_On_Momentary_Button("ALL", "全点灯", 65,25,15,"#000000","#AAAAAA");
+    html_str1 += ews.EWS_On_Momentary_Button("OUT", "全消灯", 65,25,15,"#FFFFFF","#555555");
+    html_str1 += "<br>\r\n";
+    
+    html_str2 += "<br>LED BLUE... Dim\r\n";
+    html_str2 += ews.EWS_Canvas_Slider_T("BLUE",200,40,"#777777","#0000ff"); //CanvasスライダーはString文字列に２つまでしか入らない
+    html_str2 += "<br>LED GREEN Dim\r\n";
+    html_str2 += ews.EWS_Canvas_Slider_T("GREEN",200,40,"#777777","#00ff00"); //CanvasスライダーはString文字列に２つまでしか入らない
+    
+    html_str3 += "<br>LED RED..... Dim\r\n";
+    html_str3 += ews.EWS_Canvas_Slider_T("RED",200,40,"#777777","#ff0000"); //CanvasスライダーはString文字列に２つまでしか入らない
+    html_str3 += "<br>LED RGB..... Dim\r\n";
+    html_str3 += ews.EWS_Canvas_Slider_T("_RGB",200,40,"#777777","#ffff00");
+        
+    html_str4 += "<br><br>\r\n";
+    html_str4 += ews.EWS_WebSocket_Reconnection_Button2("WS-Reconnect", "grey", 200, 40, "black" , 17);
+    html_str4 += "<br><br>\r\n";  
+    html_str4 += ews.EWS_Close_Button2("WS CLOSE", "#bbb", 150, 40, "red", 17);
+    html_str4 += ews.EWS_Window_ReLoad_Button2("ReLoad", "#bbb", 150, 40, "blue", 17);
+    html_str4 += "</body></html>\r\n";
 
-  html_str2 += "LED \r\n";
-  html_str2 += ews.EWS_On_Momentary_Button("ALL", "全点灯", 65,25,15,"#000000","#AAAAAA");
-  html_str2 += ews.EWS_On_Momentary_Button("OUT", "全消灯", 65,25,15,"#FFFFFF","#555555");
-  html_str2 += "<br>\r\n";
-  
-  html_str3 += "<br>LED BLUE... Dim\r\n";
-  html_str3 += ews.EWS_Canvas_Slider_T("BLUE",200,40,"#777777","#0000ff");
-  html_str3 += "<br>LED GREEN Dim\r\n";
-  html_str3 += ews.EWS_Canvas_Slider_T("GREEN",200,40,"#777777","#00ff00");
-  
-  html_str4 += "<br>LED RED..... Dim\r\n";
-  html_str4 += ews.EWS_Canvas_Slider_T("RED",200,40,"#777777","#ff0000");
-  html_str4 += "<br>LED RGB..... Dim\r\n";
-  html_str4 += ews.EWS_Canvas_Slider_T("_RGB",200,40,"#777777","#ffff00");
-  
-  html_str5 += "<br><br>\r\n";
-  html_str5 += "BLUE... \r\n";
-  html_str5 += ews.EWS_OnOff_Button("blue",60,25,15,"#FFFFFF","#0000FF");
-  html_str5 += ews.EWS_Touch_Slider_T("blue", "Txt1");
-  html_str5 += ews.EWS_Sl_Text("Txt1",15,"#5555FF");
-  html_str5 += "<br><br>\r\n";
-  html_str5 += "GREEN \r\n";
-  html_str5 += ews.EWS_OnOff_Button("green",60,25,15,"#FFFFFF","#00FF00");
-  html_str5 += ews.EWS_Touch_Slider_T("green", "Txt2");
-  html_str5 += ews.EWS_Sl_Text("Txt2",15,"#00ff00");
-  html_str5 += "<br><br\r\n>";
-  
-  html_str6 += "RED..... \r\n";
-  html_str6 += ews.EWS_OnOff_Button("red",60,25,15,"#FFFFFF","#ff0000");
-  html_str6 += ews.EWS_Touch_Slider_T("red", "Txt3");
-  html_str6 += ews.EWS_Sl_Text("Txt3",15,"#ff0000");
-  html_str6 += "<br><br>\r\n";
-  html_str6 += "RGB..... \r\n";
-  html_str6 += ews.EWS_Touch_Slider_BT("-RGB", "Txt4");
-  html_str6 += ews.EWS_Sl_BoxText("Txt4",30,20,15,"#000000");
-  html_str6 += "<br><br><br>\r\n";
-  html_str6 += ews.EWS_WebSocket_Reconnection_Button2("WS-Reconnect", "grey", 200, 40, "black" , 17);
-  html_str6 += "<br><br>\r\n";  
-  html_str6 += ews.EWS_Close_Button2("WS CLOSE", "#ccc", 150, 40, "red", 17);
-  html_str6 += ews.EWS_Window_ReLoad_Button2("ReLoad", "#ccc", 150, 40, "blue", 17);
-  html_str6 += "</body></html>\r\n";
-
-  html_str7 = ""; //The description here is if the string is too large. If you do not want to use it is empty.
-
-  //WebSocket ハンドシェイク関数
-  ews.EWS_HandShake(html_str1, html_str2, html_str3, html_str4, html_str5, html_str6, html_str7);
+    //WebSocket ハンドシェイク関数
+    ews.EWS_HandShake_main(3, HTM_head_file1, HTM_head_file2, HTML_body_file, dummy_file, LIP, html_str1, html_str2, html_str3, html_str4, html_str5, html_str6, html_str7);
+  }
 }

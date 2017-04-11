@@ -1,4 +1,4 @@
-# ESP8266_SPIFFS_EasyWebSocket BETA ver 1.49
+# ESP8266_SPIFFS_EasyWebSocket BETA ver 1.50
 Simple library for WebSocket communication with ESP-WROOM-02(ESP8266) and smartphone browser.  
 This requires the Arduino core for ESP8266 WiFi chip library.  
 https://github.com/esp8266/arduino  
@@ -6,6 +6,19 @@ This use SPIFFS file system.
 
 My Blog: https://www.mgo-tec.com
 # Change log:
+(1.50)  
+Greatly improved handshake function composition.  
+Added a function to GET Web articles by https (SSL).  
+Along with that, include WiFiClientSecure.h.  
+Significant improvement of sample sketch.  
+Other minor fixes.  
+　　
+-NEW Class-  
+EWS_HandShake_main  
+Get_Http_Req_Status  
+EWS_https_Web_Get  
+(Attention !: Consumes a lot of memory.)  
+  
 (1.49) 
 Added a function to GET Web articles by https (SSL).  
 Along with that, include WiFiClientSecure.h.  
@@ -63,7 +76,20 @@ Mr. Visyeii, Thank you very much.
 *Canvas_Slider was so that data transmission in only touched without slide.  
 *Updated the HTML header file "spiffs_01.txt" be read by SPIFFS file system.
 
-【更新履歴】(Japanese)   
+# 【更新履歴】(Japanese)
+(1.50)  
+ハンドシェイク関数関連の構成を大幅改良。  
+Web記事を https ( SSL )でGETする関数を追加。  
+それに伴い、WiFiClientSecure.h をインクルード。  
+サンプルスケッチの大幅改良。  
+その他、軽微な修正。  
+  
+-以下の関数を追加-  
+EWS_HandShake_main  
+Get_Http_Req_Status  
+EWS_https_Web_Get  
+(この関数はメモリを多く消費するので注意)  
+  
 (1.49)  
 Web記事を https ( SSL )でGETする関数を追加。  
 それに伴い、WiFiClientSecure.h をインクルード。  

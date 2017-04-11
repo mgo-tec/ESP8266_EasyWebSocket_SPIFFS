@@ -317,7 +317,6 @@
           setTimeout('init();', 1000);
           setTimeout('WS_Status_Get();', 3000);
         };
-        
-        //The MIT License (MIT) Copyright (c) 2016 Mgo-tec
+
       </script>
     </head>

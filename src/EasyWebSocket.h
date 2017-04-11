@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.h - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.49
+  Beta version 1.50
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
@@ -45,7 +45,6 @@ Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 #include "Arduino.h"
 #include "ESP8266WiFi.h"
 #include "WiFiClientSecure.h"
-//#include "ESP8266WebServer.h"
 #include "Hash.h"
 #include "FS.h"
 
@@ -61,9 +60,14 @@ public:
   void AP_Connect(const char* ssid, const char* password);
   void SoftAP_setup(const char* ssid, const char* password);
   void handleClient();
-  void EWS_HandShake(String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7);
-  void EWS_Dev_AutoLIP_HandShake_str(const char* HTML_head_file1, IPAddress res_LIP, const char* HTML_head_file2, String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7);
-  void EWS_HTTP_Responce();
+  bool Get_Http_Req_Status();
+  bool http_resp();
+  void HandShake_timeout(uint8_t Num);
+  File SPIFFS_open(const char *filename);
+  void EWS_HandShake_main(uint8_t sel, const char* head_file1, const char* head_file2, const char* html_file1, const char* html_file2, IPAddress res_LIP, String res_html1, String res_html2, String res_html3, String res_html4, String res_html5, String res_html6, String res_html7);
+  void EWS_HandShake(String _res_html1, String _res_html2, String _res_html3, String _res_html4, String _res_html5, String _res_html6, String _res_html7);
+  void EWS_Dev_AutoLIP_HandShake(const char* HTML_head_file1, IPAddress res_LIP, const char* HTML_head_file2, const char* HTML_file1, String res_html1, String res_html2, String res_html3, const char* HTML_file2);
+  bool EWS_HTTP_Responce();
   void Hash_Key(String h_req_key, char* h_resp_key);
   void EWS_ESP8266_Str_SEND(String str, String id);
   void EWS_PING_SEND();
@@ -104,6 +108,7 @@ private:
   char _Android_or_iPad;
   uint32_t _PingLastTime = 0;
   uint32_t _PongLastTime = 0;
+  uint32_t _GetLoopTime = 0;
 };
 
 #endif
