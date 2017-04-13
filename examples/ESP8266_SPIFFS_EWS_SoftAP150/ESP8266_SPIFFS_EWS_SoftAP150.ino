@@ -23,7 +23,6 @@ EasyWebSocket ews;
 
 String ret_str;
 String txt = "text send??";
-bool get_http_req_status = false; //ブラウザからGETリクエストがあったかどうかの判定変数
 
 int PingSendTime = 10000;
 
@@ -154,9 +153,8 @@ Serial.println(data_i);
 }
 
 void websocket_handshake(){
-  get_http_req_status = ews.Get_Http_Req_Status(); //ブラウザからGETリクエストがあったかどうかの判定
   
-  if(get_http_req_status == true){
+  if(ews.Get_Http_Req_Status()){ //ブラウザからGETリクエストがあったかどうかの判定
     String html_str1="", html_str2="", html_str3="", html_str4="", html_str5="", html_str6="", html_str7="";
 
     //※String変数一つにEWS_Canvas_Slider_T関数は２つまでしか入らない
@@ -222,4 +220,5 @@ void websocket_handshake(){
     //WebSocket ハンドシェイク関数
     ews.EWS_HandShake_main(0, "/EwsHead2.txt", "", "", "", IPAddress(0,0,0,0), html_str1, html_str2, html_str3, html_str4, html_str5, html_str6, html_str7);
   }
+
 }

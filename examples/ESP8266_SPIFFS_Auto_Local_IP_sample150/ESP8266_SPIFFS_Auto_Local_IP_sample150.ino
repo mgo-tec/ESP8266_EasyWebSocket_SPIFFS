@@ -25,7 +25,6 @@ IPAddress LIP; //ESP-WROOM-02(ESP8266) ローカルIPアドレス自動取得用
 
 String ret_str;
 String txt = "text send??";
-bool get_http_req_status = false; //ブラウザからGETリクエストがあったかどうかの判定変数
 
 int PingSendTime = 10000;
 
@@ -159,9 +158,8 @@ Serial.println(data_i);
 }
 //************************* Websocket handshake **************************************
 void websocket_handshake(){
-  get_http_req_status = ews.Get_Http_Req_Status(); //ブラウザからGETリクエストがあったかどうかの判定
   
-  if(get_http_req_status == true){
+  if(ews.Get_Http_Req_Status()){ //ブラウザからGETリクエストがあったかどうかの判定
     String html_str1="", html_str2="", html_str3="", html_str4="", html_str5="", html_str6="", html_str7="";
 
     //※String変数一つにEWS_Canvas_Slider_T関数は２つまでしか入らない
@@ -204,4 +202,5 @@ void websocket_handshake(){
     //WebSocket ハンドシェイク関数
     ews.EWS_HandShake_main(3, HTM_head_file1, HTM_head_file2, HTML_body_file, dummy_file, LIP, html_str1, html_str2, html_str3, html_str4, html_str5, html_str6, html_str7);
   }
+  
 }
