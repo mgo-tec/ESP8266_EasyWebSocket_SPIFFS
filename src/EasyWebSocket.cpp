@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.cpp - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.50
+  Beta version 1.51
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
@@ -1196,6 +1196,31 @@ String EasyWebSocket::EWS_BrowserSendRate(){
   str += "  </select>\r\n";
   str += "  <input type='button' value='Rate Exec' onclick='onButtonRate();' />\r\n";
   str += "  Transfer Rate= <span id='RateTxt'>0</span>ms\r\n";
+  str += "</form>\r\n";
+  return str;
+}
+
+String EasyWebSocket::EWS_ESP8266_SendRate(String button_id)
+{    
+  String str;
+  str += "<form name='F_esp8266SR'>\r\n";
+  str += "  <select id='sel_esp8266SR'>\r\n";
+  str += "    <option value=0>0ms</option>\r\n";
+  str += "    <option value=25>25ms</option>\r\n";
+  str += "    <option value=50>50ms</option>\r\n";
+  str += "    <option value=75>75ms</option>\r\n";
+  str += "    <option value=100>100ms</option>\r\n";
+  str += "    <option value=150>150ms</option>\r\n";
+  str += "    <option value=200>200ms</option>\r\n";
+  str += "    <option value=250>250ms</option>\r\n";
+  str += "    <option value=300>300ms</option>\r\n";
+  str += "    <option value=500>500ms</option>\r\n";
+  str += "    <option value=999>999ms</option>\r\n";
+  str += "  </select>\r\n";
+  str += "  <input type='button' value='Rate Exec' onclick='doSend(document.F_esp8266SR.sel_esp8266SR.value,\"";
+  str += button_id;
+  str += "\"); document.getElementById(\"esp8266send_RateTxt\").innerHTML=document.F_esp8266SR.sel_esp8266SR.value;'>\r\n";
+  str += "  ESP8266 Transfer Rate= <span id='esp8266send_RateTxt'>0</span>ms\r\n";
   str += "</form>\r\n";
   return str;
 }

@@ -30,6 +30,7 @@ EWS_Window_ReLoad_Button2	KEYWORD2
 EWS_WebSocket_Reconnection_Button	KEYWORD2
 EWS_WebSocket_Reconnection_Button2	KEYWORD2
 EWS_BrowserSendRate	KEYWORD2
+EWS_ESP8266_SendRate	KEYWORD2
 EWS_Status_Text	KEYWORD2
 EWS_Status_Text2	KEYWORD2
 EWS_Canvas_Slider_T	KEYWORD2
