@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.h - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.51
+  Beta version 1.51.2
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.

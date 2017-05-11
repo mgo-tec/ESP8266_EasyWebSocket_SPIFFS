@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.cpp - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.51
+  Beta version 1.51.2
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
@@ -1353,8 +1353,13 @@ String EasyWebSocket::EWS_Web_Get(const char* host, String target_ip, char char_
             ret_str += dummy_str.substring(from,to);
             ret_str += "  ";
           }
-          dummy_str = "";
         }else{
+          while(__client.available()){
+            __client.read();
+            yield();
+          }
+          delay(10);
+          __client.stop();
           break;
         }
 				yield();
@@ -1365,7 +1370,9 @@ String EasyWebSocket::EWS_Web_Get(const char* host, String target_ip, char char_
   ret_str += "\0";
  
   delay(10);
-  __client.stop();
+  if(__client){
+    __client.stop();
+  }
   delay(10);
   __client.flush();
   Serial.println(F("-------Client Stop"));
@@ -1427,8 +1434,13 @@ String EasyWebSocket::EWS_https_Web_Get(const char* host, String target_ip, char
             ret_str += dummy_str.substring(from,to);
             ret_str += "  ";
           }
-          dummy_str = "";
         }else{
+          while(Sec_client.available()){
+            Sec_client.read();
+            yield();
+          }
+          delay(10);
+          Sec_client.stop();
           break;
         }
 				yield();
@@ -1439,7 +1451,9 @@ String EasyWebSocket::EWS_https_Web_Get(const char* host, String target_ip, char
   ret_str += "\0";
 
   delay(10);
-  Sec_client.stop();
+  if(Sec_client){
+    Sec_client.stop();
+  }
   delay(10);
   Sec_client.flush();
   Serial.println(F("-------Client Stop"));

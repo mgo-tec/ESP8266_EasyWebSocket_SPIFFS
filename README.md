@@ -1,4 +1,4 @@
-# ESP8266_SPIFFS_EasyWebSocket BETA ver 1.51
+# ESP8266_SPIFFS_EasyWebSocket BETA ver 1.51.2
 Simple library for WebSocket communication with ESP-WROOM-02(ESP8266) and smartphone browser.  
 This requires the Arduino core for ESP8266 WiFi chip library.  
 https://github.com/esp8266/arduino  
@@ -6,6 +6,10 @@ This use SPIFFS file system.
 
 My Blog: https://www.mgo-tec.com
 # Change log:
+(1.51.2)  
+Fix EWS_https_Web_Get.  
+Fix EWS_Web_Get.  
+  
 (1.51)  
 EWS_ESP8266_SendRate function addition.  
 Fix sample sketch.  
@@ -81,6 +85,10 @@ Mr. Visyeii, Thank you very much.
 *Updated the HTML header file "spiffs_01.txt" be read by SPIFFS file system.
 
 # 【更新履歴】(Japanese)
+(1.51.2)  
+WS_https_Web_Get 関数修正  
+Fix EWS_Web_Get　関数修正  
+  
 (1.51)  
 EWS_ESP8266_SendRate 関数追加  
 サンプルスケッチを修正  
