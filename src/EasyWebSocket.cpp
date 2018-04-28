@@ -1,6 +1,6 @@
 /*
   EasyWebSocket.cpp - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.51.2
+  Beta version 1.52.0
 
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
@@ -42,7 +42,7 @@ Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 
 #include "EasyWebSocket.h"
 
-const char* GUID_str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+const char* _GUID_str = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 WiFiClient __client;
 WiFiServer server(80);
@@ -511,7 +511,7 @@ void EasyWebSocket::Hash_Key(String h_req_key, char* h_resp_key){
   
   String merge_str;
 
-  merge_str = h_req_key + String(GUID_str);
+  merge_str = h_req_key + String(_GUID_str);
   Serial.println(F("-------Hash key Generation"));
   Serial.print(F("merge_str ="));
   Serial.println(merge_str);
@@ -1318,7 +1318,7 @@ String EasyWebSocket::EWS_Web_Get(const char* host, String target_ip, char char_
   delay(10);
   __client.flush();
   Serial.println(F("-------WebSocket Client Stop"));
- 
+
   if (__client.connect(host, 80)) {
     Serial.print(host); Serial.print(F("-------------"));
     Serial.println(F("connected"));
@@ -1390,12 +1390,6 @@ String EasyWebSocket::EWS_https_Web_Get(const char* host, String target_ip, char
   String str3;
   String ret_str = "";
 
-  delay(10);
-  __client.stop();
-  delay(10);
-  __client.flush();
-  Serial.println(F("-------WebSocket Client Stop"));
-
   WiFiClientSecure Sec_client;
   const int httpsPort = 443;
  
@@ -1458,10 +1452,6 @@ String EasyWebSocket::EWS_https_Web_Get(const char* host, String target_ip, char
   Sec_client.flush();
   Serial.println(F("-------Client Stop"));
 
-  _WS_on = false;
-  _Ini_html_on = false;
-  _Upgrade_first_on = false;
-  
   return ret_str;
 }
 //**************************************************************

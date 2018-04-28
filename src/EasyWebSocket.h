@@ -1,7 +1,7 @@
 /*
   EasyWebSocket.h - WebSocket for ESP-WROOM-02 ( esp8266 - SPIFFS use)
-  Beta version 1.51.2
-
+  Beta version 1.52.0
+  
 Copyright (c) 2016 Mgo-tec
 This library improvement collaborator is Mr.Visyeii.
 
@@ -40,8 +40,9 @@ Copyright (c) 2015 Ivan Grokhotkov. All rights reserved.
 Released under the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 */
 
-#ifndef EasyWebSocket_h_
-#define EasyWebSocket_h_
+#ifndef _ESP8266_SPIFFS_EASYWEBSOCKET_H_
+#define _ESP8266_SPIFFS_EASYWEBSOCKET_H_
+
 #include "Arduino.h"
 #include "ESP8266WiFi.h"
 #include "WiFiClientSecure.h"
